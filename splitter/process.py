@@ -56,6 +56,8 @@ parser.add_argument('--source', type=str, help='Path to the directory that conta
 parser.add_argument('--photo_dest', help='Path to output photos. Will not overwrite files.')
 parser.add_argument('--video_dest', help='Path to output videos. Will not overwrite files.')
 parser.add_argument('--screen_recording_dest', help='Path to output screen recordings. Will not overwrite files.')
+parser.add_argument('--overwrite', dest='overwrite', action='store_true', help='Overwrite files if they exist.')
+parser.set_defaults(overwrite=False)
 args = parser.parse_args()
 
 if args.photo_dest and not os.path.isdir(args.photo_dest):
@@ -103,31 +105,31 @@ if args.source:
     if args.photo_dest:
         for path in cam_photos:
             to_path = args.photo_dest + os.path.sep + os.path.basename(path)
-            if os.path.exists(to_path):
+            if os.path.exists(to_path) and not args.overwrite:
                 print('Skipping', path)
             else:
                 print('Copying', path, 'to', to_path)
-                shutil.copyfile(path, to_path)
+                shutil.copy2(path, to_path)
         for path in cam_live_photo_videos:
             to_path = args.photo_dest + os.path.sep + os.path.basename(path)
-            if os.path.exists(to_path):
+            if os.path.exists(to_path) and not args.overwrite:
                 print('Skipping', path)
             else:
                 print('Copying', path, 'to', to_path)
-                shutil.copyfile(path, to_path)
+                shutil.copy2(path, to_path)
     if args.video_dest:
         for path in cam_videos:
             to_path = args.video_dest + os.path.sep + os.path.basename(path)
-            if os.path.exists(to_path):
+            if os.path.exists(to_path) and not args.overwrite:
                 print('Skipping', path)
             else:
                 print('Copying', path, 'to', to_path)
-                shutil.copyfile(path, to_path)
+                shutil.copy2(path, to_path)
     if args.screen_recording_dest:
         for path in screen_recordings:
             to_path = args.screen_recording_dest + os.path.sep + os.path.basename(path)
-            if os.path.exists(to_path):
+            if os.path.exists(to_path) and not args.overwrite:
                 print('Skipping', path)
             else:
                 print('Copying', path, 'to', to_path)
-                shutil.copyfile(path, to_path)
+                shutil.copy2(path, to_path)
