@@ -12,7 +12,7 @@ def list_substr_contains(l, f):
     return None
 
 def is_cam_photo(path):
-    if not path.lower().endswith(".heic"):
+    if not path.lower().endswith(".heic") and not path.lower().endswith(".jpg"):
         return False
     with open(path, 'rb') as f:
         try:
