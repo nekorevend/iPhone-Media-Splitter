@@ -12,7 +12,7 @@ def generate_report(args, cam_photos, cam_live_photo_videos, cam_videos, screens
         builder.append(f'{os.linesep}{cam_photos} new camera photos.')
         builder.append(f'{os.linesep}{cam_live_photo_videos} new videos from live photos.')
     if args.video_dest:
-        builder.append(f'{os.linesep}{cam_videos} new video recordings.')
+        builder.append(f'{os.linesep}{cam_videos} new camera videos.')
     if args.screenshot_dest:
         builder.append(f'{os.linesep}{screenshots} new screenshots.')
     if args.screen_recording_dest:
