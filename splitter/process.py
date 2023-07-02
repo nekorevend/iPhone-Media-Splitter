@@ -1,5 +1,5 @@
 import argparse
-import exifread
+import exiftool
 import os
 import shutil
 import sys
@@ -11,20 +11,24 @@ def list_substr_contains(l, f):
             return s
     return None
 
+def get_exif_data(path):
+    with exiftool.ExifToolHelper() as et:
+        metadata = et.get_metadata(path)
+        if not metadata:
+            return False
+        return metadata[0]
+
 def is_cam_photo(path):
     if not path.lower().endswith(".heic") and not path.lower().endswith(".jpg"):
         return False
-    with open(path, 'rb') as f:
-        try:
-            exifread_data = exifread.process_file(f)
-            return 'Apple' in [str(exifread_data.get('EXIF LensMake')),
-                               str(exifread_data.get('Image Make'))] \
-                   and list_substr_contains(
-                           [str(exifread_data.get('EXIF LensModel')),
-                           str(exifread_data.get('Image Model'))],
-                           'iP')  # Matches iPhone and iPad
-        except Exception:
-            return False
+    metadata = get_exif_data(path)
+    return metadata is not None \
+        and 'Apple' in [metadata.get('EXIF:LensMake', ''),
+                       metadata.get('EXIF:Make', '')] \
+        and list_substr_contains(
+                [metadata.get('EXIF:LensModel', ''),
+                metadata.get('EXIF:Model', '')],
+                'iP')  # Matches iPhone and iPad
 
 def is_cam_video(path):
     if not path.lower().endswith(".mov"):
@@ -53,7 +57,7 @@ def is_screen_recording(path):
     try:
         info = MediaInfo.parse(path)
         data = info.general_tracks[0].to_data()
-        return data['performer'] == 'ReplayKitRecording'
+        return data.get('performer') == 'ReplayKitRecording'
     except Exception:
         return False
 
@@ -83,6 +87,11 @@ parser.add_argument('--verbose', '-v', dest='verbose', action='store_true', help
 parser.set_defaults(overwrite=False)
 parser.set_defaults(verbose=False)
 args = parser.parse_args()
+
+try:
+    exiftool.ExifToolHelper()
+except FileNotFoundError:
+    print('The `exiftool` executable (from exiftool.org) is required. Please add it to your PATH.', file=sys.stderr)
 
 if args.photo_dest and not os.path.isdir(args.photo_dest):
     print('The photo destination path must be a valid directory.', file=sys.stderr)

@@ -1,2 +1,2 @@
-ExifRead<3
 pymediainfo==5.1.0
+pyexiftool==0.5.5
