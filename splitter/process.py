@@ -1,76 +1,8 @@
 import argparse
-import exiftool
+import media_types
 import os
 import shutil
 import sys
-from pymediainfo import MediaInfo
-
-def list_substr_contains(l, f):
-    for s in l:
-        if f in s:
-            return s
-    return None
-
-def get_exif_data(path):
-    with exiftool.ExifToolHelper() as et:
-        metadata = et.get_metadata(path)
-        if not metadata:
-            return False
-        return metadata[0]
-
-def is_cam_photo(path):
-    if not path.lower().endswith(".heic") and not path.lower().endswith(".jpg"):
-        return False
-    metadata = get_exif_data(path)
-    return metadata is not None \
-        and 'Apple' in [metadata.get('EXIF:LensMake', ''),
-                       metadata.get('EXIF:Make', '')] \
-        and list_substr_contains(
-                [metadata.get('EXIF:LensModel', ''),
-                metadata.get('EXIF:Model', '')],
-                'iP')  # Matches iPhone and iPad
-
-def is_cam_video(path):
-    if not path.lower().endswith(".mov"):
-        return False
-    try:
-        info = MediaInfo.parse(path)
-        data = info.general_tracks[0].to_data()
-        return data['comapplequicktimemake'] == 'Apple' \
-               and list_substr_contains(data.keys(), 'livephoto') == None
-    except Exception:
-        return False
-
-def is_live_photo_video(path):
-    if not path.lower().endswith(".mov"):
-        return False
-    try:
-        info = MediaInfo.parse(path)
-        data = info.general_tracks[0].to_data()
-        return list_substr_contains(data.keys(), 'livephoto') != None
-    except Exception:
-        return False
-
-def is_screenshot(path):
-    if not path.lower().endswith(".png"):
-        return False
-    metadata = get_exif_data(path)
-    return metadata is not None \
-        and list_substr_contains(
-            [metadata.get('ICC_Profile:DeviceManufacturer', ''),
-            metadata.get('ICC_Profile:PrimaryPlatform', '')],
-            'APPL') \
-        and metadata.get('EXIF:UserComment', '') == 'Screenshot'
-
-def is_screen_recording(path):
-    if not path.lower().endswith(".mp4"):
-        return False
-    try:
-        info = MediaInfo.parse(path)
-        data = info.general_tracks[0].to_data()
-        return data.get('performer') == 'ReplayKitRecording'
-    except Exception:
-        return False
 
 def generate_report(args, cam_photos, cam_live_photo_videos, cam_videos, screenshots, screen_recordings, strays):
     builder = [
@@ -103,7 +35,7 @@ parser.set_defaults(verbose=False)
 args = parser.parse_args()
 
 try:
-    exiftool.ExifToolHelper()
+    media_types.exiftool.ExifToolHelper()
 except FileNotFoundError:
     print('The `exiftool` executable (from exiftool.org) is required. Please add it to your PATH.', file=sys.stderr)
 
@@ -141,23 +73,23 @@ for root, _, files in os.walk(args.source):
         max_length = max(len(path), max_length)
         print(f'Processing {path}...'.ljust(max_length + 14), end='\r')
         count = 0
-        if is_cam_photo(path):
+        if media_types.is_cam_photo(path):
             count = count+1
             if args.photo_dest:
                 cam_photos.append(path)
-        if is_cam_video(path):
+        if media_types.is_cam_video(path):
             count = count+1
             if args.video_dest:
                 cam_videos.append(path)
-        if is_screenshot(path):
+        if media_types.is_screenshot(path):
             count = count+1
             if args.screenshot_dest:
                 screenshots.append(path)
-        if is_screen_recording(path):
+        if media_types.is_screen_recording(path):
             count = count+1
             if args.screen_recording_dest:
                 screen_recordings.append(path)
-        if is_live_photo_video(path):
+        if media_types.is_live_photo_video(path):
             count = count+1
             if args.photo_dest:
                 cam_live_photo_videos.append(path)
