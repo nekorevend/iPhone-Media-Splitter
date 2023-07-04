@@ -11,7 +11,7 @@ def get_exif_data(path):
     with exiftool.ExifToolHelper() as et:
         metadata = et.get_metadata(path)
         if not metadata:
-            return False
+            return None
         return metadata[0]
 
 def is_cam_photo(path):
