@@ -22,6 +22,8 @@ Every platform is different so these instructions are only in general terms.
     - Or install [git](https://git-scm.com/) and `git clone` this repository.
 1. Install [ExifTool](https://exiftool.org/).
     - Make sure it's in your PATH environment variable so your command-line is able to run it.
+1. Install [MediaInfo](https://mediaarea.net/en/MediaInfo).
+    - You need its library to be available for [pymediainfo](https://pypi.org/project/pymediainfo/) to use it.
 1. Use a [Python virtual environment](https://docs.python.org/3/library/venv.html) with [pip](https://packaging.python.org/en/latest/key_projects/#pip) to set up the dependencies for this tool.
 
 ## Known Problems
